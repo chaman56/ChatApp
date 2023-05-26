@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+  <title>ChatApp</title>
+</head>
+<script src="/socket.io/socket.io.js"></script>
+<body style="min-width: 300px;">
+  <div id="container" class="container">
+    <div class="header">
+      <button class="backbutton" onclick="showrooms()" style="padding: 4px; border: none;background: none;">
+        <i class="fa-solid fa-arrow-left fa-2xl" style="color: #ffffff;"></i></button>
+      <div> <span id="roomname"></span></div>
+      <div> <span id="name"><%= user.username %></span></div>
+      <span id="online" style="padding: 4px;"></span>
+    </div>
+    <div class="maincontent">
+      <div id="rooms" class="rooms" style="background: rgb(255, 255, 255);">
+        <div style="display: flex;align-items: center;justify-content: space-between;padding: 7px 12px;background: rgb(230, 230, 230);border-radius: 20px;">
+          <span style="font-weight: bolder;">Rooms that you are joined in!</span>
+          <button onclick="showjoinnew()" style="background: rgb(13, 231, 13);border-radius: 50%;height: 40px; width: 40px;border: none;box-shadow: 1px -1px 10px -1px gray;">
+            <i class="fa-solid fa-plus"></i></button>
+        </div>
+        <div class="joinedrooms" >
+          <div style="display: flex;align-items: center;">
+            <div style="height:40px;border-radius: 50%;overflow: hidden; width: 45px;"><img src="group.png" height="40px" alt=""></div>
+            <button onclick="getinside(this)" class="availrooms">CommonRoom</button>
+          </div>
+          <div style="display: flex;align-items: center;">
+            <div style="height:40px;border-radius: 50%;overflow: hidden; width: 45px;"><img src="man.png" height="40px" alt=""></div>
+            <button onclick="getinside(this)" class="availrooms"><%= user.username %></button>
+          </div>
+          <% for(var i = user.rooms.length-1; i>1 ; i--){ %>
+            <div style="display: flex;align-items: center;">
+              <div style="height:40px;border-radius: 50%;overflow: hidden; width: 45px;"><img src="user.png" height="40px" width="40px" alt=""></div>
+              <button class="availrooms" onclick="getinside(this)"><%= user.rooms[i] %></button>
+            </div>
+          <% } %>
+        </div>
+        <div id="joinnew" class="none" style="position: absolute;top: 0px;left: 0;" >
+          <div>
+            <input type="text" id="createjoin" placeholder="Create / join custom rooms..." style="height: 30px;width: 250px;padding: 0 10px;">
+            <button onclick="createjoin()" style="margin-left: 10px;height: 30px;width: 30px;border-radius: 5px;"> <i class="fa-solid fa-arrow-right fa-xl"></i> </button><br>
+          </div>
+          <% for(var i = 0; i<allrooms.length; i++){ %>
+            <div style="display: flex;align-items: center;">
+              <div style="height:40px;border-radius: 50%;overflow: hidden; width: 45px;"><img src="user.png" height="40px" width="40px" alt=""></div>
+              <button class="availrooms" onclick="jointhisroom(this)"><%= allrooms[i].roomname %></button>
+            </div>
+          <% } %>
+        </div>
+      </div>
+      <div class="messagecontainer" >
+        <div id="messageArea">
+          <div id="messages">
+            <div id="welcome" style="position: absolute;width: calc(100% - 370px); height: calc(80vh - 70px);display: flex;flex-direction: column; align-items: center;justify-content: center;background: rgb(245, 248, 250);">
+              <img src="hi.png" alt="" height="170px">
+              <h2>Welcome to Chat!</h2>
+              <p style="text-align: center;">Click any rooms to display <br> the chats of that room.</p>             
+            </div>
+          </div>
+        </div>
+        <div class="input">
+          <input type="text" id="textinput" placeholder="type your message.."> 
+          <button onclick="send()" style="background: none;border: none;"><img height="30px" src="send.png" alt=""></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+<script src="script.js"></script>
+</html>
