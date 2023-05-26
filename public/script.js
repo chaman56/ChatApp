@@ -29,12 +29,13 @@ async function createjoin(){
 async function getinside(it){
   await socket.emit("getroom",{roomname:it.innerHTML,username:name.innerHTML})
   roomname.innerHTML = it.innerHTML;
+  messages.innerHTML = '';
   if(window.innerWidth < 1000)
   rooms.setAttribute("class", "none");
 }
 
-if(window.innerWidth < 1000)
-  welcome.style.display = "none";
+if(window.innerWidth > 1000)
+  welcome.style.display = "flex";
 
 var socket =  io();
 socket.emit('joinall',name.innerHTML)
