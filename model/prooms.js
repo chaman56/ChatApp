@@ -3,7 +3,7 @@ const mongoose = require('mongoose')
 const roomScema = new mongoose.Schema({
   roomname : {
     type : String,
-    unique: true
+    unique : true
   },
   chats :{
     type : Array
@@ -23,5 +23,5 @@ const roomScema = new mongoose.Schema({
   }
 })
 
-const Rooms = mongoose.model('Rooms', roomScema);
-module.exports = Rooms
+const Prooms = mongoose.model('Prooms', roomScema);
+module.exports = Prooms

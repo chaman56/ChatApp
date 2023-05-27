@@ -14,14 +14,40 @@
     <div class="header">
       <button class="backbutton" onclick="showrooms()" style="padding: 4px; border: none;background: none;">
         <i class="fa-solid fa-arrow-left fa-2xl" style="color: #ffffff;"></i></button>
-      <div> <span id="roomname"></span></div>
-      <div> <span id="name"><%= user.username %></span></div>
+      <div><span id="roomname"></span></div>
+      <div><span id="name"><%= user.username %></span></div>
       <span id="online" style="padding: 4px;"></span>
     </div>
     <div class="maincontent">
       <div id="rooms" class="rooms" style="background: rgb(255, 255, 255);">
+        <button onclick="disprivate()" style="margin-bottom: 14px;padding: 3px 10px;">Private Rooms <i class="fa-solid fa-arrow-right-long fa-xl"></i></button>
+        <div id="private" class="none" style="position: absolute;top: 0px;left: 0;">
+          <button onclick="dispublic()" style="padding: 3px 14px;"><i class="fa-solid fa-arrow-left fa-xl" ></i> Public Rooms</button><br>
+          <input type="text" id="privateroom" placeholder="Create New Private room..." style="height: 30px;width: 250px;padding: 0 10px;margin: 10px 0;">
+          <button onclick="privateroom()" style="margin-left: 10px;height: 30px;width: 30px;border-radius: 5px;"> <i class="fa-solid fa-arrow-right fa-xl"></i> </button><br>
+          <div id="privaterr"></div>
+          <div style="display: flex;align-items: center;justify-content: space-between;padding: 7px 12px;background: rgb(230, 230, 230);border-radius: 20px;">
+            <span style="font-weight: bolder;">Private Rooms !</span>
+          </div>
+          <div id="privaterooms">
+            <% for(var i = user.prooms.length-1; i>=0 ; i--){ %>
+              <div style="display: flex;align-items: center;">
+                <div style="height:40px;border-radius: 50%;overflow: hidden; width: 45px;"><img src="user.png" height="40px" width="40px" alt=""></div>
+                <button class="availrooms" onclick="getinsidep(this)"><%= user.prooms[i] %></button>
+                <button id="<%= user.prooms[i] %>" onclick="disadduser(this)">+User</button>
+              </div>
+            <% } %>
+          </div>
+          <div id="adduser" class="none" style="position: absolute;top: 0px;left: 0;">
+            <button onclick="backtorooms()"><i class="fa-solid fa-arrow-left fa-2xl" ></i></button><br>
+            <p>RoomName : &nbsp;<span id="userroom"></span></p>
+            <input id="adduserinput" type="text" placeholder="Write username..">
+            <button onclick="adduser()">Add</button><br>
+            <div id="addusererr"></div>
+          </div>
+        </div>
         <div style="display: flex;align-items: center;justify-content: space-between;padding: 7px 12px;background: rgb(230, 230, 230);border-radius: 20px;">
-          <span style="font-weight: bolder;">Rooms that you are joined in!</span>
+          <span style="font-weight: bolder;">Public Rooms that you are in!</span>
           <button onclick="showjoinnew()" style="background: rgb(13, 231, 13);border-radius: 50%;height: 40px; width: 40px;border: none;box-shadow: 1px -1px 10px -1px gray;">
             <i class="fa-solid fa-plus"></i></button>
         </div>
@@ -43,7 +69,7 @@
         </div>
         <div id="joinnew" class="none" style="position: absolute;top: 0px;left: 0;" >
           <div>
-            <input type="text" id="createjoin" placeholder="Create / join custom rooms..." style="height: 30px;width: 250px;padding: 0 10px;">
+            <input type="text" id="createjoin" placeholder="Create / join Public rooms..." style="height: 30px;width: 250px;padding: 0 10px;">
             <button onclick="createjoin()" style="margin-left: 10px;height: 30px;width: 30px;border-radius: 5px;"> <i class="fa-solid fa-arrow-right fa-xl"></i> </button><br>
           </div>
           <% for(var i = 0; i<allrooms.length; i++){ %>
@@ -71,6 +97,7 @@
       </div>
     </div>
   </div>
+  <div class="chaman" style="position: absolute;bottom: 0;font-size: 10px;z-index: 0;"><a href="https://chaman56.github.io/">@chaman</a></div>
 </body>
 <script src="script.js"></script>
 </html>

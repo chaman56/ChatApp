@@ -27,6 +27,9 @@ const userSchema = new mongoose.Schema({
   rooms :{
     type : Array
   },
+  prooms : {
+    type : Array
+  },
   date : {
     type : Date,
     default : Date.now()

@@ -5,6 +5,7 @@ const bodyparser = require('body-parser');
 const dotenv = require('dotenv');
 const User = require('./model/user');
 const Room = require('./model/rooms');
+const Proom = require('./model/prooms');
 const Chat = require('./model/chats');
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
@@ -50,18 +51,15 @@ app.post('/adduser', (req,res)=>{
     username : req.body.username,
     password : req.body.password,
     messages : [],
-    rooms : ["CommonRoom" , usernam]
+    rooms : ["CommonRoom" , usernam],
+    prooms : []
   })
   user.save().then(user => {
     console.log(user);
-    const message = new Chat({
-      username:"Chaman",
-      text : `Hello ${user.firstname}! Welcome to Our Chatting Application.`
-    })
     const room = new Room({
       roomname : user.username,
       chats: [],
-      messages: [message],
+      members: [user.username],
       createdby: user.username,
       admin: user.username
     })
@@ -101,12 +99,17 @@ io.on('connection',async (socket)=>{
     for (let i = 0; i < userdata.rooms.length; i++) {
       socket.join(userdata.rooms[i]);
     }
+    for (let i = 0; i < userdata.prooms.length; i++) {
+      socket.join(userdata.prooms[i]);
+    }
   })
   socket.on('joinroom', async (data) => {
     try {
       const userdata = await User.findOne({ username: data.user });
-      await Room.findOne({ roomname: data.room }).then(roomdata =>{
-        if(!roomdata){
+      const roomdata = await Room.findOne({ roomname: data.room });
+      const proomdata = await Proom.findOne({roomname : data.room });
+      let createdroom;
+        if(!roomdata && !proomdata){
           const room = new Room({
             roomname : data.room,
             chats: [],
@@ -114,10 +117,9 @@ io.on('connection',async (socket)=>{
             createdby: data.user,
             admin: data.user
           })
-          room.save();
+          createdroom = await room.save();
         }
-      })
-      if (userdata) {
+      if(roomdata || createdroom) {
         socket.join(data.room);
         if (!userdata.rooms.includes(data.room)) {
           userdata.rooms.push(data.room);
@@ -125,16 +127,46 @@ io.on('connection',async (socket)=>{
         }
         const updatedData = await userdata.save();
         if(!updatedData){
-          res.send({message:"Couldn't join the room! Try Again!"});
+          socket.emit('publicerr',{err :"Couldn't join the room! Try Again!"});
           return;
         }
-      } else {
-        console.log('User not found.');
+      }else {
+        socket.emit('publicerr',{err: 'This room already exist in Private!'});
       }
-    }catch (err) {
-      console.log(err);
+    }catch (error) {
+      socket.emit('publicerr',{err: error});
     }
   });
+  socket.on('privateroom', async (data)=>{
+    try{
+      let proomdata = await Proom.findOne({ roomname: data.room })
+      let roomdata =  await Room.findOne( { roomname: data.room })
+        if(!roomdata && !proomdata){
+          const room = new Proom({
+            roomname : data.room,
+            chats: [],
+            members: [data.user],
+            createdby: data.user,
+            admin: data.user
+          })
+          const userdata = await User.findOne({ username: data.user });
+          userdata.prooms.push(data.room);
+          const updateduser = await userdata.save();
+          const updatedroom = await room.save();
+          if(!updatedroom || !updateduser){
+            socket.emit('privaterr', {err:"Couldn't create the room! Try Again!"});
+            return;
+          }else{
+            socket.emit('privaterr', {success:"Room Created Successfully!", room:updatedroom});
+          }
+        }else{
+          socket.emit('privaterr', {err: "Room with this name already exits!"});
+        }
+    }catch (error) {
+      socket.emit('privaterr', {err: error});
+      console.log(error);
+    }
+  })
   socket.on('getroom', async (data)=>{
     try{
       const roomdata = await Room.findOne({roomname : data.roomname});
@@ -143,6 +175,37 @@ io.on('connection',async (socket)=>{
       }
     } catch(err) {
       console.log(err);
+    }
+  })
+  socket.on('getroomp', async (data)=>{
+    try{
+      const roomdata = await Proom.findOne({roomname : data.roomname});
+      if(roomdata){
+        socket.emit('foundroom',roomdata);
+      }
+    } catch(err) {
+      console.log(err);
+    }
+  })
+  socket.on('adduser', async (data)=>{
+    try{
+      const user = await User.findOne({username: data.user});
+      if(user){
+        user.prooms.push(data.roomname);
+        await user.save();
+        const room = await Proom.findOne({roomname : data.roomname});
+        if(room.members.includes(data.user)){
+          socket.emit('addusererr',{success: "User is already Added!"});
+          return;
+        }
+        room.members.push(data.user);
+        await room.save();
+        socket.emit('addusererr',{success: "User Added Successfully!"});
+      }else{
+        socket.emit('addusererr',{err: "User doesn't exitst!"});
+      }
+    }catch(error){
+      socket.emit('addusererr',{err: error})
     }
   })
   socket.on('message', async (data)=>{
@@ -156,7 +219,13 @@ io.on('connection',async (socket)=>{
     roomdata = await Room.findOne({roomname : data.toroom});
     if(roomdata){
       roomdata.chats.push(chat);
-      roomdata.save();
+      await roomdata.save();
+    }
+    var proomdata = new Proom;
+    proomdata = await Proom.findOne({roomname : data.toroom});
+    if(proomdata){
+      proomdata.chats.push(chat);
+      await proomdata.save();
     }
   })
   
