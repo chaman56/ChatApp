@@ -12,6 +12,9 @@ const welcome     = document.getElementById("welcome");
 const aduser      = document.getElementById("adduser");
 const adduserinput= document.getElementById("adduserinput");
 const userroom    = document.getElementById("userroom");
+const backbtn     = document.getElementById("backbtn");
+const member      = document.getElementById("members");
+const memberbtn   = document.getElementById("memberbtn");
 
 
 function showrooms(){
@@ -19,6 +22,7 @@ function showrooms(){
     joinnew.setAttribute("class", "none");
     private.setAttribute("class", "none")
     aduser.setAttribute("class", "none");
+    roomname.innerHTML = '';
 }
 function showjoinnew(){
     joinnew.setAttribute("class","rooms");
@@ -27,7 +31,10 @@ function dispublic(){
   private.setAttribute("class", "none")
 }
 function disprivate(){
+  rooms.setAttribute("class","rooms");
   private.setAttribute("class", "rooms")
+  backbtn.setAttribute("onclick", "showrooms()");
+  roomname.innerHTML = '';
 }
 function disadduser(it){
   userroom.innerHTML = it.id;
@@ -59,6 +66,8 @@ async function getinside(it){
   messages.innerHTML = '';
   await socket.emit("getroom",{roomname:it.innerHTML,username:name.innerHTML})
   roomname.innerHTML = it.innerHTML;
+  const unread = document.querySelector(`.${it.innerHTML}`);
+  unread.innerHTML = '';
   if(window.innerWidth < 1000)
   rooms.setAttribute("class", "none");
 }
@@ -66,8 +75,27 @@ async function getinsidep(it){
   messages.innerHTML = '';
   await socket.emit("getroomp",{roomname:it.innerHTML,username:name.innerHTML})
   roomname.innerHTML = it.innerHTML;
+  const unread = document.querySelector(`.${it.innerHTML}`);
+  unread.innerHTML = '';
   if(window.innerWidth < 1000)
   rooms.setAttribute("class", "none");
+  backbtn.setAttribute("onclick","disprivate()");
+}
+function dismembers(){
+  if(roomname.innerHTML!=''){
+    member.className = "members";
+    memberbtn.setAttribute("onclick","hidemembers()");
+  }else{
+    member.className = "members";
+    memberbtn.setAttribute("onclick","hidemembers()");
+    const userinfo = document.getElementById("userdata");
+    member.innerHTML = userinfo.innerHTML;
+    member.style.textAlign = "center"
+  }
+}
+function hidemembers(){
+  member.className = "none";
+  memberbtn.setAttribute("onclick","dismembers()");
 }
 
 
@@ -78,28 +106,41 @@ var socket =  io();
 socket.emit('joinall',name.innerHTML)
 socket.on('online',(data)=>{onlin.innerHTML = data.text});
 socket.on('broadcast',(data)=>{
-  if(roomname.innerHTML == data.toroom){
+ if(roomname.innerHTML == data.toroom){
   const p = document.createElement("div");
   messages.appendChild(p);
-  const span = document.createElement("div1")
-  p.appendChild(span);
-  const name = document.createElement("span");
-  name.innerHTML+=data.user + "  &nbsp; ";
-  name.setAttribute("class","name");
-  span.appendChild(name);
-  span.innerHTML += data.text;
-  messageBody.scrollTop = messageBody.scrollHeight + span.style.height;
+  p.style.padding= 3+"px";
+  p.innerHTML =  `
+    <div style="background-color: white;text-align: left;display: inline-block;padding: 8px 10px;border-radius: 10px;max-width: 70%;">
+      <div>
+        <div class="name" style="color: rgb(255, 85, 0);">
+          <div>${data.user}</div>
+        </div>
+        <div class="text">
+          ${data.text}
+        </div>
+        <div style="color: gray;text-align:right;font-size:9px;">now</div>
+      </div>
+    </div>
+  `;
+    messageBody.scrollTop = messageBody.scrollHeight + p.style.height;
   }
 })
-socket.on('broadcastme',(data)=>{
+socket.on('broadcastme',async(data)=>{
   const p = document.createElement("div");
   messages.appendChild(p);
-  const span = document.createElement("div1")
-  p.appendChild(span);
-  span.innerHTML = data.text
-  p.style.textAlign = 'right';
-  span.style.background = 'rgb(131, 211, 136)';
-  messageBody.scrollTop = messageBody.scrollHeight + span.style.height;
+  p.style.padding= 3+"px";
+  p.innerHTML =  `
+    <div style="background-color: rgb(217, 255, 215);text-align: left;display: inline-block;padding: 8px 10px;border-radius: 10px;max-width: 70%;">
+      <div>
+        <div class="text">
+          ${data.text}
+        </div>
+      </div>
+    </div>
+  `;
+  p.style.textAlign = "right";
+  messageBody.scrollTop = messageBody.scrollHeight + p.style.height;
 })
 socket.on('joined',(data)=>{
   let joinedroom = document.createElement("button");
@@ -110,24 +151,51 @@ socket.on('joined',(data)=>{
   parent.setAttribute("style","display: flex;align-items: center;");
   parent.innerHTML = '<div style="height:40px;border-radius: 50%;overflow: hidden; width: 45px;"><img src="boy.png" height="40px" width="40px" alt=""></div>'
   parent.append(joinedroom)
+  let span = document.createElement("span");
+  span.setAttribute("class",data);
+  span.setAttribute("id","n");
+  parent.append(span);
   joinedrooms.prepend(parent);
 })
 socket.on('foundroom',(roomdata)=>{
   messages.innerHTML = '';
+  member.innerHTML = `<h3>Created By</h3><p>${roomdata.createdby}</p><h3>Members</h3><hr>`;
+  for (let i = 0; i < roomdata.members.length; i++) {
+    const element = document.createElement("p");
+    element.innerHTML = roomdata.members[i];
+    member.append(element);
+  }
   for (let i = 0; i < roomdata.chats.length; i++) {
+    let time = roomdata.chats[i].date.substr(11,5);
     const p = document.createElement("div");
+    p.style.padding= 3+"px";
     messages.appendChild(p);
-    const span = document.createElement("div1")
-    p.appendChild(span);
-    let nam = document.createElement("span");
-    nam.innerHTML+=roomdata.chats[i].username + "  &nbsp; ";
-    nam.setAttribute("class","name");
-    span.appendChild(nam);
-    span.innerHTML += roomdata.chats[i].text;
-    if(roomdata.chats[i].username == name.innerHTML){
-      span.style.background = 'rgb(131, 211, 136)';
-      p.style.textAlign = "right";
-      nam.setAttribute("class","")
+    if(roomdata.chats[i].username != name.innerHTML){
+      p.innerHTML =  `
+        <div style="background-color: white;text-align: left;display: inline-block;padding: 8px 10px;border-radius: 10px;max-width: 70%;">
+          <div>
+            <div class="name" style="color: rgb(255, 85, 0);">
+              <div>${roomdata.chats[i].username}</div>
+            </div>
+            <div class="text">
+              ${roomdata.chats[i].text}
+            </div>
+            <div style="color: gray;text-align:right;font-size:9px;">${time}</div>
+          </div>
+        </div>
+      `
+    }else{
+      p.style.textAlign = "right"
+      p.innerHTML =  `
+        <div style="background-color: rgb(217, 255, 215);text-align: left;display: inline-block;padding: 8px 10px;border-radius: 10px;max-width: 70%;">
+          <div>
+            <div class="text">
+              ${roomdata.chats[i].text}
+            </div>
+            <div style="color: gray;text-align:right;font-size:9px;">${time}</div>
+          </div>
+        </div>
+      `
     }
   }
   messageBody.scrollTop = messageBody.scrollHeight;
@@ -160,6 +228,15 @@ socket.on('privaterr', (data)=>{
   }
 })
 
+socket.on('n+', (data)=>{
+  const unread = document.querySelector(`.${data}`);
+  let x = unread.innerHTML;
+  if(x=='')x=0;
+  unread.innerHTML = parseInt(x) + 1;
+  if(data == roomname.innerHTML)
+  unread.innerHTML = '';
+})
+
 
 
 function send(){
@@ -167,7 +244,7 @@ function send(){
   textinput.value = '';
 }
 addEventListener("keyup",(e)=>{
-  if(e.keyCode == 13)
+  if(e.keyCode == 13 && textinput.value!='')
   send();
 })
 

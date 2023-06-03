@@ -51,11 +51,10 @@ app.post('/adduser', (req,res)=>{
     username : req.body.username,
     password : req.body.password,
     messages : [],
-    rooms : ["CommonRoom" , usernam],
+    rooms : [{roomname : "CommonRoom", n:0 }, { roomname: usernam , n:0}],
     prooms : []
   })
   user.save().then(user => {
-    console.log(user);
     const room = new Room({
       roomname : user.username,
       chats: [],
@@ -80,7 +79,7 @@ app.get('/chat', async (req, res) => {
       res.render('login', { message: "Invalid login credentials!" });
       return;
     }
-    const chatdata = await Room.findOne({roomname: "CommonRoom"});
+    const chatdata = await Room.findOne({roomname: "CommonRoom"});  //Remove it
     const allrooms = await Room.find();
     res.render('user', { user: data, roomdata: chatdata, allrooms: allrooms });
   } catch (err) {
@@ -90,17 +89,17 @@ app.get('/chat', async (req, res) => {
 
 
 var users = 0;
-io.on('connection',async (socket)=>{
+io.on('connection', async (socket)=>{
   users++;
   io.sockets.emit('online', {text:users + " online"});
   socket.join("CommonRoom")
   socket.on('joinall', async (data)=>{
     var userdata = await User.findOne({username: data});
     for (let i = 0; i < userdata.rooms.length; i++) {
-      socket.join(userdata.rooms[i]);
+      socket.join(userdata.rooms[i].roomname);
     }
     for (let i = 0; i < userdata.prooms.length; i++) {
-      socket.join(userdata.prooms[i]);
+      socket.join(userdata.prooms[i].roomname);
     }
   })
   socket.on('joinroom', async (data) => {
@@ -113,7 +112,7 @@ io.on('connection',async (socket)=>{
           const room = new Room({
             roomname : data.room,
             chats: [],
-            messages: [],
+            members: [data.user],
             createdby: data.user,
             admin: data.user
           })
@@ -121,12 +120,14 @@ io.on('connection',async (socket)=>{
         }
       if(roomdata || createdroom) {
         socket.join(data.room);
-        if (!userdata.rooms.includes(data.room)) {
-          userdata.rooms.push(data.room);
+        if (!userdata.rooms.some(room => room.roomname == data.room)) {
+          userdata.rooms.push({roomname: data.room,n:0});
+          roomdata.members.push(data.user);
           socket.emit("joined",data.room);
         }
         const updatedData = await userdata.save();
-        if(!updatedData){
+        const updatedRoom = await roomdata.save();
+        if(!updatedData || !updatedRoom){
           socket.emit('publicerr',{err :"Couldn't join the room! Try Again!"});
           return;
         }
@@ -150,7 +151,7 @@ io.on('connection',async (socket)=>{
             admin: data.user
           })
           const userdata = await User.findOne({ username: data.user });
-          userdata.prooms.push(data.room);
+          userdata.prooms.push({roomname: data.room, n:0});
           const updateduser = await userdata.save();
           const updatedroom = await room.save();
           if(!updatedroom || !updateduser){
@@ -172,6 +173,15 @@ io.on('connection',async (socket)=>{
       const roomdata = await Room.findOne({roomname : data.roomname});
       if(roomdata){
         socket.emit('foundroom',roomdata);
+        let user = await User.findOne({username: data.username});
+        if(user){
+          user.rooms.some(room=>{
+            if(room.roomname == data.roomname){
+              room.n=0;
+            }
+          })
+          await user.save();
+        }
       }
     } catch(err) {
       console.log(err);
@@ -179,9 +189,19 @@ io.on('connection',async (socket)=>{
   })
   socket.on('getroomp', async (data)=>{
     try{
+      
       const roomdata = await Proom.findOne({roomname : data.roomname});
       if(roomdata){
         socket.emit('foundroom',roomdata);
+        let user = await User.findOne({username: data.username});
+        if(user){
+          user.prooms.some(room=>{
+            if(room.roomname == data.roomname){
+              room.n=0;
+            }
+          })
+          await user.save();
+        }
       }
     } catch(err) {
       console.log(err);
@@ -191,13 +211,13 @@ io.on('connection',async (socket)=>{
     try{
       const user = await User.findOne({username: data.user});
       if(user){
-        user.prooms.push(data.roomname);
-        await user.save();
         const room = await Proom.findOne({roomname : data.roomname});
         if(room.members.includes(data.user)){
           socket.emit('addusererr',{success: "User is already Added!"});
           return;
         }
+        user.prooms.push({roomname:data.roomname, n:0});
+        await user.save();
         room.members.push(data.user);
         await room.save();
         socket.emit('addusererr',{success: "User Added Successfully!"});
@@ -211,6 +231,7 @@ io.on('connection',async (socket)=>{
   socket.on('message', async (data)=>{
     socket.emit('broadcastme',data);
     socket.in(data.toroom).emit('broadcast', data);
+    socket.in(data.toroom).emit('n+',data.toroom);
     var chat = new Chat({
       username : data.user,
       text : data.text
@@ -219,13 +240,25 @@ io.on('connection',async (socket)=>{
     roomdata = await Room.findOne({roomname : data.toroom});
     if(roomdata){
       roomdata.chats.push(chat);
-      await roomdata.save();
+      const roomd = await roomdata.save();
+      for (let i = 0; i < roomd.members.length; i++) {
+        if(roomd.members[i] == data.user)continue;
+        let user = await User.findOne({username: roomd.members[i]});
+        user.rooms.some(room=>{if(room.roomname == roomd.roomname){room.n+=1;}});
+        await user.save();
+      }
     }
     var proomdata = new Proom;
     proomdata = await Proom.findOne({roomname : data.toroom});
     if(proomdata){
       proomdata.chats.push(chat);
-      await proomdata.save();
+      const proomd = await proomdata.save();
+      for (let i = 0; i < proomd.members.length; i++) {
+        if(proomd.members[i] == data.user)continue;
+        let user = await User.findOne({username: proomd.members[i]});
+        user.prooms.some(room=>{if(room.roomname == proomd.roomname)room.n+=1});
+        await user.save();
+      }
     }
   })
   

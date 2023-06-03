@@ -12,11 +12,12 @@
 <body style="min-width: 300px;">
   <div id="container" class="container">
     <div class="header">
-      <button class="backbutton" onclick="showrooms()" style="padding: 4px; border: none;background: none;">
+      <button id="backbtn" class="backbutton" onclick="showrooms()" style="padding: 4px; border: none;background: none;">
         <i class="fa-solid fa-arrow-left fa-2xl" style="color: #ffffff;"></i></button>
       <div><span id="roomname"></span></div>
       <div><span id="name"><%= user.username %></span></div>
       <span id="online" style="padding: 4px;"></span>
+      <button id="memberbtn" onclick="dismembers()">....</button>
     </div>
     <div class="maincontent">
       <div id="rooms" class="rooms" style="background: rgb(255, 255, 255);">
@@ -31,10 +32,10 @@
           </div>
           <div id="privaterooms">
             <% for(var i = user.prooms.length-1; i>=0 ; i--){ %>
-              <div style="display: flex;align-items: center;">
+              <div id="hbutton" id="hbutton" style="display: flex;align-items: center;">
                 <div style="height:40px;border-radius: 50%;overflow: hidden; width: 45px;"><img src="user.png" height="40px" width="40px" alt=""></div>
-                <button class="availrooms" onclick="getinsidep(this)"><%= user.prooms[i] %></button>
-                <button id="<%= user.prooms[i] %>" onclick="disadduser(this)">+User</button>
+                <button class="availrooms" onclick="getinsidep(this)"><%= user.prooms[i].roomname %></button><span class="<%= user.prooms[i].roomname %>" id="n"><% if(user.prooms[i].n!==0){ %><%= user.prooms[i].n %><% } %></span>
+                <button id="<%= user.prooms[i].roomname %>" onclick="disadduser(this)">+User</button>
               </div>
             <% } %>
           </div>
@@ -46,44 +47,52 @@
             <div id="addusererr"></div>
           </div>
         </div>
-        <div style="display: flex;align-items: center;justify-content: space-between;padding: 7px 12px;background: rgb(230, 230, 230);border-radius: 20px;">
+        <div style="display: flex;align-items: center;justify-content: space-between;padding: 7px 12px;background: rgb(230, 230, 230);border-radius: 20px;margin-bottom: 5px;">
           <span style="font-weight: bolder;">Public Rooms that you are in!</span>
           <button onclick="showjoinnew()" style="background: rgb(13, 231, 13);border-radius: 50%;height: 40px; width: 40px;border: none;box-shadow: 1px -1px 10px -1px gray;">
             <i class="fa-solid fa-plus"></i></button>
         </div>
         <div class="joinedrooms" >
-          <div style="display: flex;align-items: center;">
+          <div id="hbutton" style="display: flex;align-items: center;">
             <div style="height:40px;border-radius: 50%;overflow: hidden; width: 45px;"><img src="group.png" height="40px" alt=""></div>
-            <button onclick="getinside(this)" class="availrooms">CommonRoom</button>
+            <button onclick="getinside(this)" class="availrooms">CommonRoom</button><span class="CommonRoom" id="n"><% if(user.rooms[0].n!=0){ %><%= user.rooms[0].n %><% } %></span>
           </div>
-          <div style="display: flex;align-items: center;">
+          <div id="hbutton" style="display: flex;align-items: center;">
             <div style="height:40px;border-radius: 50%;overflow: hidden; width: 45px;"><img src="man.png" height="40px" alt=""></div>
-            <button onclick="getinside(this)" class="availrooms"><%= user.username %></button>
+            <button onclick="getinside(this)" class="availrooms"><%= user.username %></button><span class="<%= user.username %>" id="n"><% if(user.rooms[1].n!=0){ %><%= user.rooms[1].n %><% } %></span>
           </div>
           <% for(var i = user.rooms.length-1; i>1 ; i--){ %>
-            <div style="display: flex;align-items: center;">
+            <div id="hbutton" style="display: flex;align-items: center;">
               <div style="height:40px;border-radius: 50%;overflow: hidden; width: 45px;"><img src="user.png" height="40px" width="40px" alt=""></div>
-              <button class="availrooms" onclick="getinside(this)"><%= user.rooms[i] %></button>
+              <button class="availrooms" onclick="getinside(this)"><%= user.rooms[i].roomname %></button><span class="<%= user.rooms[i].roomname %>" id="n"><% if(user.rooms[i].n!=0){ %><%= user.rooms[i].n %><% } %></span>
             </div>
           <% } %>
         </div>
         <div id="joinnew" class="none" style="position: absolute;top: 0px;left: 0;" >
           <div>
+            <button class="backbutton" onclick="showrooms()" style="padding: 4px; border: none;background: none;">
+              <i class="fa-solid fa-arrow-left fa-2xl" style="color: #000000;"></i></button>
             <input type="text" id="createjoin" placeholder="Create / join Public rooms..." style="height: 30px;width: 250px;padding: 0 10px;">
             <button onclick="createjoin()" style="margin-left: 10px;height: 30px;width: 30px;border-radius: 5px;"> <i class="fa-solid fa-arrow-right fa-xl"></i> </button><br>
           </div>
           <% for(var i = 0; i<allrooms.length; i++){ %>
-            <div style="display: flex;align-items: center;">
+            <div id="hbutton" style="display: flex;align-items: center;">
               <div style="height:40px;border-radius: 50%;overflow: hidden; width: 45px;"><img src="user.png" height="40px" width="40px" alt=""></div>
               <button class="availrooms" onclick="jointhisroom(this)"><%= allrooms[i].roomname %></button>
             </div>
           <% } %>
         </div>
       </div>
+      <div id="userdata" class="none">
+        <h3>Profile</h3>
+        <div><%= user.firstname %>&nbsp;<%= user.lastname %></div>
+        <div style="font-size: 12px;"><%= user.email %></div><br>
+      </div>
       <div class="messagecontainer" >
         <div id="messageArea">
+          <div id="members" class="none"></div>
           <div id="messages">
-            <div id="welcome" style="position: absolute;width: calc(100% - 370px); height: calc(80vh - 70px);display: none;flex-direction: column; align-items: center;justify-content: center;background: rgb(245, 248, 250);">
+            <div id="welcome" style="position: absolute;width: calc(100% - 370px); height: calc(80vh - 70px);display: none;flex-direction: column; align-items: center;justify-content: center;">
               <img src="hi.png" alt="" height="170px">
               <h2>Welcome to Chat!</h2>
               <p style="text-align: center;">Click any rooms to display <br> the chats of that room.</p>             
@@ -97,7 +106,7 @@
       </div>
     </div>
   </div>
-  <div class="chaman" style="position: absolute;bottom: 0;font-size: 10px;z-index: 0;"><a href="https://chaman56.github.io/">@chaman</a></div>
+  <div class="chaman" style="position: absolute;bottom: 0;z-index: 0;"><a href="https://chaman56.github.io/" style="color: antiquewhite; text-decoration: none;font-size: 8px;padding-top: 10px;">chaman</a></div>
 </body>
 <script src="script.js"></script>
 </html>

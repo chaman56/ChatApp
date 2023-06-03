@@ -24,12 +24,18 @@ const userSchema = new mongoose.Schema({
   messages:{
     type : Array
   },
-  rooms :{
-    type : Array
-  },
-  prooms : {
-    type : Array
-  },
+  rooms :[
+    {
+      roomname: String,
+      n: Number
+    }
+  ],
+  prooms :[
+    {
+      roomname: String,
+      n: Number
+    }
+  ],
   date : {
     type : Date,
     default : Date.now()
