@@ -24,29 +24,7 @@ function showrooms(){
     aduser.setAttribute("class", "none");
     roomname.innerHTML = '';
 }
-document.addEventListener('backbutton', function(){
-  if(flag==0){
-    showrooms();
-    return false;
-  }else{
-    navigator.app.exitApp();
-  }
-})
-window.addEventListener("hashchange", function(){
-  console.log("Hash changed to", window.location.hash);
-  // .... Do your thing here...
-});
-window.addEventListener('unload', function(){
-  if(flag==0){
-    showrooms();
-    return false;
-  }else{
-    navigator.app.exitApp();
-  }
-})
-setInterval(() => {
-  flag=0;
-}, 500);
+
 function showjoinnew(){
     joinnew.setAttribute("class","rooms");
 }
