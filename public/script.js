@@ -15,7 +15,7 @@ const userroom    = document.getElementById("userroom");
 const backbtn     = document.getElementById("backbtn");
 const member      = document.getElementById("members");
 const memberbtn   = document.getElementById("memberbtn");
-
+let flag = 0;
 
 function showrooms(){
     rooms.setAttribute("class","rooms");
@@ -24,6 +24,29 @@ function showrooms(){
     aduser.setAttribute("class", "none");
     roomname.innerHTML = '';
 }
+document.addEventListener('backbutton', function(){
+  if(flag==0){
+    showrooms();
+    return false;
+  }else{
+    navigator.app.exitApp();
+  }
+})
+window.addEventListener("hashchange", function(){
+  console.log("Hash changed to", window.location.hash);
+  // .... Do your thing here...
+});
+window.addEventListener('unload', function(){
+  if(flag==0){
+    showrooms();
+    return false;
+  }else{
+    navigator.app.exitApp();
+  }
+})
+setInterval(() => {
+  flag=0;
+}, 500);
 function showjoinnew(){
     joinnew.setAttribute("class","rooms");
 }
@@ -124,6 +147,12 @@ socket.on('broadcast',(data)=>{
     </div>
   `;
     messageBody.scrollTop = messageBody.scrollHeight + p.style.height;
+    setTimeout(function() {
+      messageBody.scrollTop = messageBody.scrollHeight;
+    }, 500);
+    setTimeout(function() {
+      messageBody.scrollTop = messageBody.scrollHeight;
+    }, 1100);
   }
 })
 socket.on('broadcastme',async(data)=>{
@@ -141,6 +170,12 @@ socket.on('broadcastme',async(data)=>{
   `;
   p.style.textAlign = "right";
   messageBody.scrollTop = messageBody.scrollHeight + p.style.height;
+  setTimeout(function() {
+    messageBody.scrollTop = messageBody.scrollHeight;
+  }, 500);
+  setTimeout(function() {
+    messageBody.scrollTop = messageBody.scrollHeight;
+  }, 1100);
 })
 socket.on('joined',(data)=>{
   let joinedroom = document.createElement("button");
@@ -202,6 +237,9 @@ socket.on('foundroom', async (roomdata)=>{
   setTimeout(function() {
     messageBody.scrollTop = messageBody.scrollHeight;
   }, 500);
+  setTimeout(function() {
+    messageBody.scrollTop = messageBody.scrollHeight;
+  }, 1100);
 })
 socket.on('addusererr',(data)=>{
   const addusererr = document.getElementById("addusererr");
@@ -242,9 +280,14 @@ socket.on('n+', (data)=>{
 
 
 function upload(files) {
+ if(files[0].size > 1000045){
+    alert("Image Size Must be smaller than 1 Mb!");
+    this.value = "";
+ }else{
   socket.emit("uploadimg", files[0], (status) => {
     console.log(status);
   });
+ }
 }
 
 function send(){
@@ -253,7 +296,7 @@ function send(){
 }
 socket.on('uploaded', (file)=>{
   console.log(file);
-  socket.emit('message', {text : `<img id="imageload" style="max-width:100%;" src="${file.url}" alt="">`,user:name.innerHTML,toroom:roomname.innerHTML});
+  socket.emit('message', {text : `<a href="${file.url}" ><img id="imageload" style="max-width:100%;" src="${file.url}" alt=""></a>`,user:name.innerHTML,toroom:roomname.innerHTML});
   textinput.value = '';
 })
 

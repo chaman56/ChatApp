@@ -269,9 +269,9 @@ io.on('connection', async (socket)=>{
     }
   })
   cloudinary.config({ 
-    cloud_name: 'djrzg20q4', 
-    api_key: '894362325429518', 
-    api_secret: 'uJWNP0vR8sa1m9sffvP3u6BX6ww' 
+    cloud_name: process.env.cloud_name, 
+    api_key: process.env.api_key, 
+    api_secret: process.env.api_secret 
   });
   
   socket.on('uploadimg',async (file, callback) => {

@@ -65,6 +65,15 @@
     </div>
   </div>
 </body>
+<script type="text/javascript">
+  function preventBack() {
+      window.history.forward(); 
+  }
+    
+  setTimeout("preventBack()", 0);
+    
+  window.onunload = function () { null };
+</script>
 <script>
   const loginText = document.querySelector(".title-text .login");
   const loginForm = document.querySelector("form.login");
