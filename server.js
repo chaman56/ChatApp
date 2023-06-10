@@ -9,6 +9,13 @@ const Proom = require('./model/prooms');
 const Chat = require('./model/chats');
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
+const fs = require('fs');
+const cloudinary = require('cloudinary').v2;
+const multer = require('multer');
+const {storage} = require('./cloudinary.js')
+const upload = multer({storage});
+
+let imgfile;
 
 
 app.use(bodyparser.urlencoded({extended:true}))
@@ -261,12 +268,34 @@ io.on('connection', async (socket)=>{
       }
     }
   })
+  cloudinary.config({ 
+    cloud_name: 'djrzg20q4', 
+    api_key: '894362325429518', 
+    api_secret: 'uJWNP0vR8sa1m9sffvP3u6BX6ww' 
+  });
   
+  socket.on('uploadimg',async (file, callback) => {
+    console.log(file);
+    await fs.writeFileSync("image.jpg", file);
+    await cloudinary.uploader.upload(
+      "image.jpg",
+      function(error, result) {console.log(result); socket.emit('uploaded',result)}
+    );
+  })
+  /* function uploaded(data){
+    console.log(imgfile);
+    socket.emit('uploaded', data);
+  }
+  app.post('/upload', upload.single('uploadfile'), async (req, res) => {
+    imgfile = req.file;
+    uploaded(imgfile);
+  }) */
   socket.on('disconnect',function(){
     users--;
     io.sockets.emit('online',{text:users+" online"})
   })
 })
+
 
 var PORT = process.env.PORT || 3000
 http.listen(PORT,()=>{

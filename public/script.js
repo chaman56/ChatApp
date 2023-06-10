@@ -157,7 +157,7 @@ socket.on('joined',(data)=>{
   parent.append(span);
   joinedrooms.prepend(parent);
 })
-socket.on('foundroom',(roomdata)=>{
+socket.on('foundroom', async (roomdata)=>{
   messages.innerHTML = '';
   member.innerHTML = `<h3>Created By</h3><p>${roomdata.createdby}</p><h3>Members</h3><hr>`;
   for (let i = 0; i < roomdata.members.length; i++) {
@@ -199,6 +199,9 @@ socket.on('foundroom',(roomdata)=>{
     }
   }
   messageBody.scrollTop = messageBody.scrollHeight;
+  setTimeout(function() {
+    messageBody.scrollTop = messageBody.scrollHeight;
+  }, 500);
 })
 socket.on('addusererr',(data)=>{
   const addusererr = document.getElementById("addusererr");
@@ -238,13 +241,30 @@ socket.on('n+', (data)=>{
 })
 
 
+function upload(files) {
+  socket.emit("uploadimg", files[0], (status) => {
+    console.log(status);
+  });
+}
 
 function send(){
   socket.emit('message', {text : textinput.value,user:name.innerHTML,toroom:roomname.innerHTML});
   textinput.value = '';
 }
+socket.on('uploaded', (file)=>{
+  console.log(file);
+  socket.emit('message', {text : `<img id="imageload" style="max-width:100%;" src="${file.url}" alt="">`,user:name.innerHTML,toroom:roomname.innerHTML});
+  textinput.value = '';
+})
+
 addEventListener("keyup",(e)=>{
   if(e.keyCode == 13 && textinput.value!='')
   send();
 })
 
+
+$(document).on('submit','#uploadFile',function(e){
+  e.preventDefault();
+  var formData = new FormData(this);
+  socket.emit('uploadimg', formData);
+});

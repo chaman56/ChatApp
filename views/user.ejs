@@ -100,13 +100,19 @@
           </div>
         </div>
         <div class="input">
+          <label class="custom-file-upload">
+            <input type="file" onchange="upload(this.files)"  name="" id="imageinput" />
+            <img src="upload.png" height="25px" alt="">
+          </label>
           <input type="text" id="textinput" placeholder="type your message.."> 
           <button onclick="send()" style="background: none;border: none;"><img height="30px" src="send.png" alt=""></button>
+          
         </div>
       </div>
     </div>
   </div>
-  <!-- <div class="chaman" style="position: absolute;bottom: 0;z-index: 0;"><a href="https://chaman56.github.io/" style="color: antiquewhite; text-decoration: none;font-size: 8px;padding-top: 10px;">chaman</a></div> -->
-</body>
+  <!-- <div class="chaman" style="position: absolute;bottom: 0;z-index: 0;"><a href="https://chaman56.github.io/" style="color: antiquewhite; text-decoration: none;font-size: 8px;padding-top: 10px;">chaman</a></div> --></body>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 <script src="script.js"></script>
 </html>
+<!--  -->

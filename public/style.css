@@ -139,6 +139,16 @@ body{
   background: #b1b1b1a1; 
 }
 
+input[type="file"] {
+  display: none;
+}
+.custom-file-upload {
+  display: inline-block;
+  cursor: pointer;
+  margin-left: -10px;
+  margin-right: 10px;
+}
+
 @media only screen and (max-width : 500px) {
   .container{
     width: 100%;
