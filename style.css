@@ -1,0 +1,203 @@
+@import url('https://fonts.googleapis.com/css?family=Poppins:400,500,600,700&display=swap');
+
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+button{
+  cursor: pointer;
+}
+.none{
+  display: none;
+}
+body{
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: url("https://c4.wallpaperflare.com/wallpaper/587/550/452/firewatch-video-game-art-minimalism-simple-hd-wallpaper-preview.jpg")center no-repeat;
+  background-size: cover;
+}
+.container{
+  position: relative;
+  overflow: hidden;
+  width: 400px;
+  height:100vh;
+  background-color: rgba(249, 251, 255, 0.2);
+  border: 1px solid gray;
+  backdrop-filter: blur(6px);
+}
+.header{
+  background-color: #35054a;
+  height: 40px;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+}
+.rooms{
+  position: absolute;
+  width: 100%;
+  height: calc(100vh - 40px) ;
+  background: white;
+  padding: 15px;
+  overflow-y: scroll;
+}
+.availrooms{
+  cursor: pointer;
+  width: calc(100% - 80px);
+  height: 50px;
+  padding: 0 20px;
+  border: none;
+  background: none;
+  text-align: left;
+  border-bottom: 1px solid rgb(243, 243, 243);
+}
+#hbutton{
+  padding: 0 5px;
+}
+#hbutton:hover{
+  background-color: rgb(244, 244, 244);
+  border-radius: 5px;
+}
+#messageArea{
+  width: 100%;
+  height: calc(100vh - 90px);
+  min-width: 267px;
+  padding:10px;
+  padding-bottom: 0px;
+  overflow: scroll;
+}
+
+#messages div1{
+  background-color: rgb(255, 234, 209);
+  display: inline-block;
+  text-align: left;
+  padding: 8px 10px;
+  border-radius: 10px;
+  max-width: 70%;
+}
+#n{
+  background-color: rgb(37, 202, 31);
+  width: 22px;
+  border-radius: 50%;
+  color: white;
+  font-size: 14px;
+  text-align: center;
+}
+.members{
+  padding: 10px;
+  background: #ffffff;
+  position: absolute;
+  right: 0;
+  border: 1px solid rgba(206, 206, 206, 0.589);
+  border-top: none;
+}
+
+.name{
+  font-size: 10px;
+  font-family: Arial, Helvetica, sans-serif;
+  color: rgb(255, 136, 0);
+}
+#name{
+  width: 50%;
+  height: 30px;
+  border-radius: 5px;
+}
+.input{
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding:5px;
+}
+#textinput{
+  height: 35px;
+  width: 75%;
+  min-width: 200px;
+  border-radius: 20px;
+  padding: 0 1rem;
+  margin-left: 5px;
+  border: none;
+}
+::-webkit-scrollbar {
+  width: 5px;
+  height: 0px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(249, 251, 255, 0); 
+}
+::-webkit-scrollbar-thumb {
+  background: #cfcfcf9b; 
+  border-radius: 5px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #b1b1b1a1; 
+}
+
+input[type="file"] {
+  display: none;
+}
+.custom-file-upload {
+  display: inline-block;
+  cursor: pointer;
+  margin-left: -10px;
+  margin-right: 10px;
+}
+
+@media only screen and (max-width : 500px) {
+  .container{
+    width: 100%;
+    height: 100vh;
+  }
+  #messageArea{
+    left: 0;
+  }
+}
+
+
+@media only screen and (min-width : 1000px){
+  .container{
+    width: 80%;
+    max-width: 1000px;
+    height: 80vh;
+    display: flex;
+    flex-direction: column;
+    border-radius: 20px;
+    box-shadow: 3px 2px 30px -5px gray;
+    border: none;
+    backdrop-filter: blur(50px);
+    background-color: rgba(255, 255, 255, 0.26);
+  }
+  #rooms{
+    position: relative;
+    width: 350px;
+    border-right: 1px solid rgba(184, 184, 184, 0.819);
+    background-color: aqua;
+  }
+  .maincontent{
+    display: flex;
+  }
+  .header{
+    position: absolute;
+    right: 0;
+    width: calc(100% - 350px);
+  }
+  .backbutton{
+    display: none;
+  }
+  #messageArea{
+    margin-top: 40px;
+    height: calc(80vh - 100px);
+  }
+  .messagecontainer{
+    width: calc(100% - 350px);
+  }
+  .chaman{
+    font-size: 1rem;
+  }
+}
